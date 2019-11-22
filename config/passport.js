@@ -14,6 +14,8 @@ const { OAuthStrategy } = require('passport-oauth');
 const { OAuth2Strategy } = require('passport-oauth');
 const _ = require('lodash');
 const moment = require('moment');
+var QuickBooks = require('node-quickbooks')
+
 
 const User = require('../models/User');
 
@@ -63,6 +65,62 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, (email, password, don
  *       - If there is, return an error message.
  *       - Else create a new account.
  */
+
+ /**
+ * Intuit/QuickBooks API OAuth.
+ */
+const quickbooksStrategyConfig = new OAuth2Strategy({
+  authorizationURL: 'https://appcenter.intuit.com/connect/oauth2',
+  tokenURL: 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer',
+  clientID: process.env.QUICKBOOKS_CLIENT_ID,
+  clientSecret: process.env.QUICKBOOKS_CLIENT_SECRET,
+  callbackURL: `${process.env.BASE_URL}/auth/quickbooks/callback`,
+  passReqToCallback: true
+},
+(res, accessToken, refreshToken, params, profile, done) => {
+  // console.log('Something went wrong.',res);
+  // console.log('accessToken', accessToken);
+  // console.log('refreshToken', refreshToken);
+  // console.log('params', params);
+  console.log('profile', profile);
+  const realmId = res.query.realmId;
+  const clientID = process.env.QUICKBOOKS_CLIENT_ID;
+  const clientSecret = process.env.QUICKBOOKS_CLIENT_SECRET;
+ 
+  // User.findOne({realmId}, (err, user) => {
+    User.findById(res.user._id, (err, user) => {
+    console.log('some Error', err);
+    
+    if (err) { return done(err); }
+    user.quickbooks = res.query.realmId;
+    if (user.tokens.filter((vendor) => (vendor.kind === 'quickbooks'))[0]) {
+      user.tokens.some((tokenObject) => {
+        if (tokenObject.kind === 'quickbooks') {
+          tokenObject.accessToken = accessToken;
+          tokenObject.accessTokenExpires = moment().add(params.expires_in, 'seconds').format();
+          tokenObject.refreshToken = refreshToken;
+          tokenObject.refreshTokenExpires = moment().add(params.x_refresh_token_expires_in, 'seconds').format();
+          if (params.expires_in) tokenObject.accessTokenExpires = moment().add(params.expires_in, 'seconds').format();
+          return true;
+        }
+        return false;
+      });
+      user.markModified('tokens');
+      user.save((err) => { done(err, user); });
+    } else {
+      user.tokens.push({
+        kind: 'quickbooks',
+        accessToken,
+        accessTokenExpires: moment().add(params.expires_in, 'seconds').format(),
+        refreshToken,
+        refreshTokenExpires: moment().add(params.x_refresh_token_expires_in, 'seconds').format()
+      });
+      user.save((err) => { done(err, user); });
+    }
+  });
+});
+passport.use('quickbooks', quickbooksStrategyConfig);
+refresh.use('quickbooks', quickbooksStrategyConfig);
 
 /**
  * Sign in with Snapchat.
@@ -127,14 +185,19 @@ passport.use(new FacebookStrategy({
   profileFields: ['name', 'email', 'link', 'locale', 'timezone', 'gender'],
   passReqToCallback: true
 }, (req, accessToken, refreshToken, profile, done) => {
+  console.log('Profile',profile);
   if (req.user) {
     User.findOne({ facebook: profile.id }, (err, existingUser) => {
+      console.log('Woata! 1');
+      
       if (err) { return done(err); }
       if (existingUser) {
         req.flash('errors', { msg: 'There is already a Facebook account that belongs to you. Sign in with that account or delete it, then link it with your current account.' });
         done(err);
       } else {
+        console.log('Woata! 2');
         User.findById(req.user.id, (err, user) => {
+          console.log('Woata! 3');
           if (err) { return done(err); }
           user.facebook = profile.id;
           user.tokens.push({ kind: 'facebook', accessToken });
@@ -150,16 +213,19 @@ passport.use(new FacebookStrategy({
     });
   } else {
     User.findOne({ facebook: profile.id }, (err, existingUser) => {
+      console.log('Woata! 4');
       if (err) { return done(err); }
       if (existingUser) {
         return done(null, existingUser);
       }
       User.findOne({ email: profile._json.email }, (err, existingEmailUser) => {
+        console.log('Woata! 5');
         if (err) { return done(err); }
         if (existingEmailUser) {
           req.flash('errors', { msg: 'There is already an account using this email address. Sign in to that account and link it with Facebook manually from Account Settings.' });
           done(err);
         } else {
+          console.log('Woata! 6');
           const user = new User();
           user.email = profile._json.email;
           user.facebook = profile.id;
@@ -596,49 +662,7 @@ passport.use('pinterest', new OAuth2Strategy({
   });
 }));
 
-/**
- * Intuit/QuickBooks API OAuth.
- */
-const quickbooksStrategyConfig = new OAuth2Strategy({
-  authorizationURL: 'https://appcenter.intuit.com/connect/oauth2',
-  tokenURL: 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer',
-  clientID: process.env.QUICKBOOKS_CLIENT_ID,
-  clientSecret: process.env.QUICKBOOKS_CLIENT_SECRET,
-  callbackURL: `${process.env.BASE_URL}/auth/quickbooks/callback`,
-  passReqToCallback: true
-},
-(res, accessToken, refreshToken, params, profile, done) => {
-  User.findById(res.user._id, (err, user) => {
-    if (err) { return done(err); }
-    user.quickbooks = res.query.realmId;
-    if (user.tokens.filter((vendor) => (vendor.kind === 'quickbooks'))[0]) {
-      user.tokens.some((tokenObject) => {
-        if (tokenObject.kind === 'quickbooks') {
-          tokenObject.accessToken = accessToken;
-          tokenObject.accessTokenExpires = moment().add(params.expires_in, 'seconds').format();
-          tokenObject.refreshToken = refreshToken;
-          tokenObject.refreshTokenExpires = moment().add(params.x_refresh_token_expires_in, 'seconds').format();
-          if (params.expires_in) tokenObject.accessTokenExpires = moment().add(params.expires_in, 'seconds').format();
-          return true;
-        }
-        return false;
-      });
-      user.markModified('tokens');
-      user.save((err) => { done(err, user); });
-    } else {
-      user.tokens.push({
-        kind: 'quickbooks',
-        accessToken,
-        accessTokenExpires: moment().add(params.expires_in, 'seconds').format(),
-        refreshToken,
-        refreshTokenExpires: moment().add(params.x_refresh_token_expires_in, 'seconds').format()
-      });
-      user.save((err) => { done(err, user); });
-    }
-  });
-});
-passport.use('quickbooks', quickbooksStrategyConfig);
-refresh.use('quickbooks', quickbooksStrategyConfig);
+
 
 /**
  * Login Required middleware.

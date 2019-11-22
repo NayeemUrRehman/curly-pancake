@@ -24,7 +24,7 @@ const upload = multer({ dest: path.join(__dirname, 'uploads') });
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
-dotenv.config({ path: '.env.example' });
+dotenv.config({ path: '.env' });
 
 /**
  * Controllers (route handlers).
@@ -235,7 +235,9 @@ app.get('/auth/pinterest/callback', passport.authorize('pinterest', { failureRed
 });
 app.get('/auth/quickbooks', passport.authorize('quickbooks', { scope: ['com.intuit.quickbooks.accounting'], state: 'SOME STATE' }));
 app.get('/auth/quickbooks/callback', passport.authorize('quickbooks', { failureRedirect: '/login' }), (req, res) => {
-  res.redirect(req.session.returnTo);
+  console.log('sure?');
+  res.redirect('/api/quickbooks');
+  // res.redirect(req.session.returnTo);
 });
 
 /**
