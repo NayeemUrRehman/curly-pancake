@@ -14,7 +14,7 @@ const { OAuthStrategy } = require('passport-oauth');
 const { OAuth2Strategy } = require('passport-oauth');
 const _ = require('lodash');
 const moment = require('moment');
-var QuickBooks = require('node-quickbooks')
+var QuickBooks = require('node-quickbooks');
 
 
 const User = require('../models/User');

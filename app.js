@@ -33,8 +33,13 @@ const homeController = require('./controllers/home');
 const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
+const quickbooksController = require('./controllers/controller.quickbooks');
 
 /**
+ * Routes
+ */
+const { quickbooksRouter } = require('./routes/routes.quickbooks.js');
+ /** 
  * API keys and Passport configuration.
  */
 const passportConfig = require('./config/passport');
@@ -180,7 +185,9 @@ app.get('/api/google-maps', apiController.getGoogleMaps);
 app.get('/api/google/drive', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getGoogleDrive);
 app.get('/api/chart', apiController.getChart);
 app.get('/api/google/sheets', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getGoogleSheets);
-app.get('/api/quickbooks', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getQuickbooks);
+// app.get('/api/quickbooks', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getQuickbooks);
+app.get('/api/quickbooks', passportConfig.isAuthenticated, passportConfig.isAuthorized, quickbooksController.getCustomerList);
+app.get('/api/quickbooks/get-accounts', passportConfig.isAuthenticated, passportConfig.isAuthorized, quickbooksController.getAccounts);
 
 /**
  * OAuth authentication routes. (Sign in)
