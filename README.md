@@ -1,28 +1,18 @@
 ![](https://lh4.googleusercontent.com/-PVw-ZUM9vV8/UuWeH51os0I/AAAAAAAAD6M/0Ikg7viJftQ/w1286-h566-no/hackathon-starter-logo.jpg)
-Hackathon Starter
+Invoice Management Starter
 =======================
 
-[![Dependency Status](https://david-dm.org/sahat/hackathon-starter/status.svg?style=flat)](https://david-dm.org/sahat/hackathon-starter) [![devDependencies Status](https://david-dm.org/sahat/hackathon-starter/dev-status.svg)](https://david-dm.org/sahat/hackathon-starter?type=dev) [![Build Status](https://travis-ci.org/sahat/hackathon-starter.svg?branch=master)](https://travis-ci.org/sahat/hackathon-starter) [![Join the chat at https://gitter.im/sahat/hackathon-starter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/sahat/hackathon-starter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Dependency Status](https://david-dm.org/sahat/hackathon-starter/status.svg?style=flat)](https://david-dm.org/sahat/hackathon-starter) [![devDependencies Status](https://david-dm.org/sahat/hackathon-starter/dev-status.svg)](https://david-dm.org/sahat/hackathon-starter?type=dev) [![Build Status](https://travis-ci.org/sahat/hackathon-starter.svg?branch=master)](https://travis-ci.org/sahat/hackathon-starter)
 
 **Live Demo**: https://hackathon-starter.walcony.com
 
 Jump to [What's new?](https://github.com/sahat/hackathon-starter/blob/master/CHANGELOG.md)
 
 **Node.js** web applications.
-> **“Small world with Sahat's project. We were using his hackathon starter for our hackathon this past weekend and got some prizes. Really handy repo!”**<br>
-> — Interview candidate for one of the companies I used to work with.
+> **“Small world with This project.”**<br>
+> — Interactive project details here
 
-<h4 align="center">Modern Theme</h4>
 
-![](https://lh6.googleusercontent.com/-KQTmCFNK6MM/U7OZpznjDuI/AAAAAAAAERc/h3jR27Uy1lE/w1366-h1006-no/Screenshot+2014-07-02+01.32.22.png)
-
-<h4 align="center">Flatly Bootstrap Theme</h4>
-
-![](https://lh5.googleusercontent.com/-oJ-7bSYisRY/U1a-WhK_LoI/AAAAAAAAECM/a04fVYgefzw/w1474-h1098-no/Screen+Shot+2014-04-22+at+3.08.33+PM.png)
-
-<h4 align="center">API Examples</h4>
-
-![](https://lh5.googleusercontent.com/-BJD2wK8CvC8/VLodBsyL-NI/AAAAAAAAEx0/SafE6o_qq_I/w1818-h1186-no/Screenshot%2B2015-01-17%2B00.25.49.png)
 
 Table of Contents
 -----------------
@@ -55,7 +45,7 @@ Features
 --------
 
 - **Local Authentication** using Email and Password
-- **OAuth 1.0a Authentication** via Twitter
+<!-- - **OAuth 1.0a Authentication** via Twitter -->
 - **OAuth 2.0 Authentication** via Facebook, Google, GitHub, LinkedIn, Instagram
 - Flash notifications
 - MVC Project Structure
@@ -86,11 +76,6 @@ Prerequisites
  - <img src="http://i1-news.softpedia-static.com/images/extra/LINUX/small/slw218news1.png" height="17">&nbsp;**Fedora**: `sudo dnf groupinstall "Development Tools"`
  - <img src="https://en.opensuse.org/images/b/be/Logo-geeko_head.png" height="17">&nbsp;**OpenSUSE:** `sudo zypper install --type pattern devel_basis`
 
-**Note:** If you are new to Node or Express, you may find
-[Node.js & Express From Scratch series](https://www.youtube.com/watch?v=Ad2ngx6CT0M&list=PLillGF-RfqbYRpji8t4SxUkMxfowG4Kqp&index=3)
-helpful for learning the basics of Node and Express. Alternatively,
-here is another great tutorial for complete beginners - [Getting Started With Node.js, Express, MongoDB](http://cwbuecheler.com/web/tutorials/2013/node-express-mongo/).
-
 Getting Started
 ---------------
 
@@ -98,10 +83,10 @@ The easiest way to get started is to clone the repository:
 
 ```bash
 # Get the latest snapshot
-git clone https://github.com/sahat/hackathon-starter.git myproject
+git clone https://github.com/NayeemUrRehman/curly-pancake.git InvoiceManagement
 
 # Change directory
-cd myproject
+cd InvoiceManagement
 
 # Install NPM dependencies
 npm install

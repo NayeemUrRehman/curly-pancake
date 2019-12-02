@@ -1,14 +1,14 @@
 FROM node:8-slim
 
-WORKDIR /starter
+WORKDIR /invoice-management
 ENV NODE_ENV development
 
-COPY package.json /starter/package.json
+COPY package.json /invoice-management/package.json
 
 RUN npm install --production
 
-COPY .env.example /starter/.env.example
-COPY . /starter
+COPY .env.example /invoice-management/.env.example
+COPY . /invoice-management
 
 CMD ["npm","start"]
 

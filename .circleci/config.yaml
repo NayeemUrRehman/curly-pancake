@@ -1,0 +1,46 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node
+    steps:
+      - checkout
+
+      - setup_remote_docker:
+          docker_layer_caching: true
+
+      - run:
+          name: Install Docker Client
+          command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            sudo mv -f /tmp/docker/* /usr/bin
+      - run:
+          name: Build and push Docker image
+          command: |
+            TAG=latest
+            docker build -t nayeemurrehman/invoice-management:$TAG .
+            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+            docker push nayeemurrehman/invoice-management:$TAG
+            echo "Docker image for nayeemurrehman/invoice-management pushed to registry!"
+  deploy:
+    machine: true
+    steps:
+      - checkout
+
+      - run:
+          name: 'Deployment'
+          command: |
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+              branches:
+                only: master
+      - deploy:
+          requires:
+              - build
