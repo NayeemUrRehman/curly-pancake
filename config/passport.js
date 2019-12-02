@@ -78,7 +78,7 @@ const quickbooksStrategyConfig = new OAuth2Strategy({
   passReqToCallback: true
 },
 (res, accessToken, refreshToken, params, profile, done) => {
-  // console.log('Something went wrong.',res);
+  // console.log('Something went wrong.',res);    
   // console.log('accessToken', accessToken);
   // console.log('refreshToken', refreshToken);
   // console.log('params', params);
@@ -97,6 +97,8 @@ const quickbooksStrategyConfig = new OAuth2Strategy({
       user.tokens.some((tokenObject) => {
         if (tokenObject.kind === 'quickbooks') {
           tokenObject.accessToken = accessToken;
+          console.log('tojen');
+          
           tokenObject.accessTokenExpires = moment().add(params.expires_in, 'seconds').format();
           tokenObject.refreshToken = refreshToken;
           tokenObject.refreshTokenExpires = moment().add(params.x_refresh_token_expires_in, 'seconds').format();
@@ -669,6 +671,7 @@ passport.use('pinterest', new OAuth2Strategy({
  */
 exports.isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
+        
     return next();
   }
   res.redirect('/login');

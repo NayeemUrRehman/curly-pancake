@@ -1,4 +1,4 @@
-const Quickbooks = require('node-quickbooks');
+  const Quickbooks = require('node-quickbooks');
 const validator = require('validator');
 
 Quickbooks.setOauthVersion('2.0');
@@ -9,16 +9,11 @@ exports.getCustomerList = function(req, res) {
     const qbo = new Quickbooks(process.env.QUICKBOOKS_CLIENT_ID, process.env.QUICKBOOKS_CLIENT_SECRET,
       token.accessToken, false, req.user.quickbooks, true, false, null, '2.0', token.refreshToken);
   
-    qbo.reportProfitAndLoss((_, accounts) => {
-      console.log('kuch tou hai daya', JSON.parse(JSON.stringify(accounts.Columns.Column[0].MetaData)));
+    qbo.reportAgedReceivables((_,accounts)   => {
+      console.log('kuch tou hai daya',accounts);
       res.send(accounts)
-    });
-    // qbo.findCustomers((_, customers) => {
-    //   res.render('api/quickbooks', {
-    //     title: 'Quickbooks API',
-    //     customers: customers.QueryResponse.Customer
-    //   });
-    // });
+    }); 
+  
 };
 
 exports.getAccounts = function(req, res){
