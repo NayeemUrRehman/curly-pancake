@@ -1,20 +1,12 @@
 const passport = require('passport');
 const refresh = require('passport-oauth2-refresh');
-const axios = require('axios');
-const { Strategy: InstagramStrategy } = require('passport-instagram');
 const { Strategy: LocalStrategy } = require('passport-local');
 const { Strategy: FacebookStrategy } = require('passport-facebook');
 const { Strategy: SnapchatStrategy } = require('passport-snapchat');
-const { Strategy: TwitterStrategy } = require('passport-twitter');
-const { Strategy: GitHubStrategy } = require('passport-github');
 const { OAuth2Strategy: GoogleStrategy } = require('passport-google-oauth');
-const { Strategy: LinkedInStrategy } = require('passport-linkedin-oauth2');
-const { Strategy: OpenIDStrategy } = require('passport-openid');
-const { OAuthStrategy } = require('passport-oauth');
 const { OAuth2Strategy } = require('passport-oauth');
 const _ = require('lodash');
 const moment = require('moment');
-var QuickBooks = require('node-quickbooks');
 
 
 const User = require('../models/User');
@@ -82,11 +74,7 @@ const quickbooksStrategyConfig = new OAuth2Strategy({
   // console.log('accessToken', accessToken);
   // console.log('refreshToken', refreshToken);
   // console.log('params', params);
-  console.log('profile', profile);
-  const realmId = res.query.realmId;
-  const clientID = process.env.QUICKBOOKS_CLIENT_ID;
-  const clientSecret = process.env.QUICKBOOKS_CLIENT_SECRET;
- 
+  console.log('profile', profile); 
   // User.findOne({realmId}, (err, user) => {
     User.findById(res.user._id, (err, user) => {
     console.log('some Error', err);
@@ -190,8 +178,7 @@ passport.use(new FacebookStrategy({
   console.log('Profile',profile);
   if (req.user) {
     User.findOne({ facebook: profile.id }, (err, existingUser) => {
-      console.log('Woata! 1');
-      
+      console.log('Woata! 1',existingUser);
       if (err) { return done(err); }
       if (existingUser) {
         req.flash('errors', { msg: 'There is already a Facebook account that belongs to you. Sign in with that account or delete it, then link it with your current account.' });
@@ -245,119 +232,6 @@ passport.use(new FacebookStrategy({
   }
 }));
 
-/**
- * Sign in with GitHub.
- */
-passport.use(new GitHubStrategy({
-  clientID: process.env.GITHUB_ID,
-  clientSecret: process.env.GITHUB_SECRET,
-  callbackURL: `${process.env.BASE_URL}/auth/github/callback`,
-  passReqToCallback: true,
-  scope: ['user:email']
-}, (req, accessToken, refreshToken, profile, done) => {
-  if (req.user) {
-    User.findOne({ github: profile.id }, (err, existingUser) => {
-      if (existingUser) {
-        req.flash('errors', { msg: 'There is already a GitHub account that belongs to you. Sign in with that account or delete it, then link it with your current account.' });
-        done(err);
-      } else {
-        User.findById(req.user.id, (err, user) => {
-          if (err) { return done(err); }
-          user.github = profile.id;
-          user.tokens.push({ kind: 'github', accessToken });
-          user.profile.name = user.profile.name || profile.displayName;
-          user.profile.picture = user.profile.picture || profile._json.avatar_url;
-          user.profile.location = user.profile.location || profile._json.location;
-          user.profile.website = user.profile.website || profile._json.blog;
-          user.save((err) => {
-            req.flash('info', { msg: 'GitHub account has been linked.' });
-            done(err, user);
-          });
-        });
-      }
-    });
-  } else {
-    User.findOne({ github: profile.id }, (err, existingUser) => {
-      if (err) { return done(err); }
-      if (existingUser) {
-        return done(null, existingUser);
-      }
-      User.findOne({ email: profile._json.email }, (err, existingEmailUser) => {
-        if (err) { return done(err); }
-        if (existingEmailUser) {
-          req.flash('errors', { msg: 'There is already an account using this email address. Sign in to that account and link it with GitHub manually from Account Settings.' });
-          done(err);
-        } else {
-          const user = new User();
-          user.email = _.get(_.orderBy(profile.emails, ['primary', 'verified'], ['desc', 'desc']), [0, 'value'], null);
-          user.github = profile.id;
-          user.tokens.push({ kind: 'github', accessToken });
-          user.profile.name = profile.displayName;
-          user.profile.picture = profile._json.avatar_url;
-          user.profile.location = profile._json.location;
-          user.profile.website = profile._json.blog;
-          user.save((err) => {
-            done(err, user);
-          });
-        }
-      });
-    });
-  }
-}));
-
-/**
- * Sign in with Twitter.
- */
-passport.use(new TwitterStrategy({
-  consumerKey: process.env.TWITTER_KEY,
-  consumerSecret: process.env.TWITTER_SECRET,
-  callbackURL: `${process.env.BASE_URL}/auth/twitter/callback`,
-  passReqToCallback: true
-}, (req, accessToken, tokenSecret, profile, done) => {
-  if (req.user) {
-    User.findOne({ twitter: profile.id }, (err, existingUser) => {
-      if (err) { return done(err); }
-      if (existingUser) {
-        req.flash('errors', { msg: 'There is already a Twitter account that belongs to you. Sign in with that account or delete it, then link it with your current account.' });
-        done(err);
-      } else {
-        User.findById(req.user.id, (err, user) => {
-          if (err) { return done(err); }
-          user.twitter = profile.id;
-          user.tokens.push({ kind: 'twitter', accessToken, tokenSecret });
-          user.profile.name = user.profile.name || profile.displayName;
-          user.profile.location = user.profile.location || profile._json.location;
-          user.profile.picture = user.profile.picture || profile._json.profile_image_url_https;
-          user.save((err) => {
-            if (err) { return done(err); }
-            req.flash('info', { msg: 'Twitter account has been linked.' });
-            done(err, user);
-          });
-        });
-      }
-    });
-  } else {
-    User.findOne({ twitter: profile.id }, (err, existingUser) => {
-      if (err) { return done(err); }
-      if (existingUser) {
-        return done(null, existingUser);
-      }
-      const user = new User();
-      // Twitter will not provide an email address.  Period.
-      // But a person’s twitter username is guaranteed to be unique
-      // so we can "fake" a twitter email address as follows:
-      user.email = `${profile.username}@twitter.com`;
-      user.twitter = profile.id;
-      user.tokens.push({ kind: 'twitter', accessToken, tokenSecret });
-      user.profile.name = profile.displayName;
-      user.profile.location = profile._json.location;
-      user.profile.picture = profile._json.profile_image_url_https;
-      user.save((err) => {
-        done(err, user);
-      });
-    });
-  }
-}));
 
 /**
  * Sign in with Google.
@@ -429,240 +303,7 @@ const googleStrategyConfig = new GoogleStrategy({
 passport.use('google', googleStrategyConfig);
 refresh.use('google', googleStrategyConfig);
 
-/**
- * Sign in with LinkedIn.
- */
-passport.use(new LinkedInStrategy({
-  clientID: process.env.LINKEDIN_ID,
-  clientSecret: process.env.LINKEDIN_SECRET,
-  callbackURL: `${process.env.BASE_URL}/auth/linkedin/callback`,
-  scope: ['r_liteprofile', 'r_emailaddress'],
-  passReqToCallback: true
-}, (req, accessToken, refreshToken, profile, done) => {
-  if (req.user) {
-    User.findOne({ linkedin: profile.id }, (err, existingUser) => {
-      if (err) { return done(err); }
-      if (existingUser) {
-        req.flash('errors', { msg: 'There is already a LinkedIn account that belongs to you. Sign in with that account or delete it, then link it with your current account.' });
-        done(err);
-      } else {
-        User.findById(req.user.id, (err, user) => {
-          if (err) { return done(err); }
-          user.linkedin = profile.id;
-          user.tokens.push({ kind: 'linkedin', accessToken });
-          user.profile.name = user.profile.name || profile.displayName;
-          user.profile.picture = user.profile.picture || profile.photos[3].value;
-          user.save((err) => {
-            if (err) { return done(err); }
-            req.flash('info', { msg: 'LinkedIn account has been linked.' });
-            done(err, user);
-          });
-        });
-      }
-    });
-  } else {
-    User.findOne({ linkedin: profile.id }, (err, existingUser) => {
-      if (err) { return done(err); }
-      if (existingUser) {
-        return done(null, existingUser);
-      }
-      User.findOne({ email: profile.emails[0].value }, (err, existingEmailUser) => {
-        if (err) { return done(err); }
-        if (existingEmailUser) {
-          req.flash('errors', { msg: 'There is already an account using this email address. Sign in to that account and link it with LinkedIn manually from Account Settings.' });
-          done(err);
-        } else {
-          const user = new User();
-          user.linkedin = profile.id;
-          user.tokens.push({ kind: 'linkedin', accessToken });
-          user.email = profile.emails[0].value;
-          user.profile.name = profile.displayName;
-          user.profile.picture = user.profile.picture || profile.photos[3].value;
-          user.save((err) => {
-            done(err, user);
-          });
-        }
-      });
-    });
-  }
-}));
 
-/**
- * Sign in with Instagram.
- */
-passport.use(new InstagramStrategy({
-  clientID: process.env.INSTAGRAM_ID,
-  clientSecret: process.env.INSTAGRAM_SECRET,
-  callbackURL: '/auth/instagram/callback',
-  passReqToCallback: true
-}, (req, accessToken, refreshToken, profile, done) => {
-  if (req.user) {
-    User.findOne({ instagram: profile.id }, (err, existingUser) => {
-      if (err) { return done(err); }
-      if (existingUser) {
-        req.flash('errors', { msg: 'There is already an Instagram account that belongs to you. Sign in with that account or delete it, then link it with your current account.' });
-        done(err);
-      } else {
-        User.findById(req.user.id, (err, user) => {
-          if (err) { return done(err); }
-          user.instagram = profile.id;
-          user.tokens.push({ kind: 'instagram', accessToken });
-          user.profile.name = user.profile.name || profile.displayName;
-          user.profile.picture = user.profile.picture || profile._json.data.profile_picture;
-          user.profile.website = user.profile.website || profile._json.data.website;
-          user.save((err) => {
-            req.flash('info', { msg: 'Instagram account has been linked.' });
-            done(err, user);
-          });
-        });
-      }
-    });
-  } else {
-    User.findOne({ instagram: profile.id }, (err, existingUser) => {
-      if (err) { return done(err); }
-      if (existingUser) {
-        return done(null, existingUser);
-      }
-      const user = new User();
-      user.instagram = profile.id;
-      user.tokens.push({ kind: 'instagram', accessToken });
-      user.profile.name = profile.displayName;
-      // Similar to Twitter API, assigns a temporary e-mail address
-      // to get on with the registration process. It can be changed later
-      // to a valid e-mail address in Profile Management.
-      user.email = `${profile.username}@instagram.com`;
-      user.profile.website = profile._json.data.website;
-      user.profile.picture = profile._json.data.profile_picture;
-      user.save((err) => {
-        done(err, user);
-      });
-    });
-  }
-}));
-
-/**
- * Tumblr API OAuth.
- */
-passport.use('tumblr', new OAuthStrategy({
-  requestTokenURL: 'https://www.tumblr.com/oauth/request_token',
-  accessTokenURL: 'https://www.tumblr.com/oauth/access_token',
-  userAuthorizationURL: 'https://www.tumblr.com/oauth/authorize',
-  consumerKey: process.env.TUMBLR_KEY,
-  consumerSecret: process.env.TUMBLR_SECRET,
-  callbackURL: '/auth/tumblr/callback',
-  passReqToCallback: true
-},
-(req, token, tokenSecret, profile, done) => {
-  User.findById(req.user._id, (err, user) => {
-    if (err) { return done(err); }
-    user.tokens.push({ kind: 'tumblr', accessToken: token, tokenSecret });
-    user.save((err) => {
-      done(err, user);
-    });
-  });
-}));
-
-/**
- * Foursquare API OAuth.
- */
-passport.use('foursquare', new OAuth2Strategy({
-  authorizationURL: 'https://foursquare.com/oauth2/authorize',
-  tokenURL: 'https://foursquare.com/oauth2/access_token',
-  clientID: process.env.FOURSQUARE_ID,
-  clientSecret: process.env.FOURSQUARE_SECRET,
-  callbackURL: process.env.FOURSQUARE_REDIRECT_URL,
-  passReqToCallback: true
-},
-(req, accessToken, refreshToken, profile, done) => {
-  User.findById(req.user._id, (err, user) => {
-    if (err) { return done(err); }
-    user.tokens.push({ kind: 'foursquare', accessToken });
-    user.save((err) => {
-      done(err, user);
-    });
-  });
-}));
-
-/**
- * Steam API OpenID.
- */
-passport.use(new OpenIDStrategy({
-  apiKey: process.env.STEAM_KEY,
-  providerURL: 'http://steamcommunity.com/openid',
-  returnURL: `${process.env.BASE_URL}/auth/steam/callback`,
-  realm: `${process.env.BASE_URL}/`,
-  stateless: true,
-  passReqToCallback: true,
-}, (req, identifier, done) => {
-  const steamId = identifier.match(/\d+$/)[0];
-  const profileURL = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${process.env.STEAM_KEY}&steamids=${steamId}`;
-
-  if (req.user) {
-    User.findOne({ steam: steamId }, (err, existingUser) => {
-      if (err) { return done(err); }
-      if (existingUser) {
-        req.flash('errors', { msg: 'There is already an account associated with the SteamID. Sign in with that account or delete it, then link it with your current account.' });
-        done(err);
-      } else {
-        User.findById(req.user.id, (err, user) => {
-          if (err) { return done(err); }
-          user.steam = steamId;
-          user.tokens.push({ kind: 'steam', accessToken: steamId });
-          axios.get(profileURL)
-            .then((res) => {
-              const profile = res.data.response.players[0];
-              user.profile.name = user.profile.name || profile.personaname;
-              user.profile.picture = user.profile.picture || profile.avatarmedium;
-              user.save((err) => {
-                done(err, user);
-              });
-            })
-            .catch((err) => {
-              user.save((err) => { done(err, user); });
-              done(err, null);
-            });
-        });
-      }
-    });
-  } else {
-    axios.get(profileURL)
-      .then(({ data }) => {
-        const profile = data.response.players[0];
-        const user = new User();
-        user.steam = steamId;
-        user.email = `${steamId}@steam.com`; // steam does not disclose emails, prevent duplicate keys
-        user.tokens.push({ kind: 'steam', accessToken: steamId });
-        user.profile.name = profile.personaname;
-        user.profile.picture = profile.avatarmedium;
-        user.save((err) => {
-          done(err, user);
-        });
-      }).catch((err) => {
-        done(err, null);
-      });
-  }
-}));
-
-/**
- * Pinterest API OAuth.
- */
-passport.use('pinterest', new OAuth2Strategy({
-  authorizationURL: 'https://api.pinterest.com/oauth/',
-  tokenURL: 'https://api.pinterest.com/v1/oauth/token',
-  clientID: process.env.PINTEREST_ID,
-  clientSecret: process.env.PINTEREST_SECRET,
-  callbackURL: process.env.PINTEREST_REDIRECT_URL,
-  passReqToCallback: true
-},
-(req, accessToken, refreshToken, profile, done) => {
-  User.findById(req.user._id, (err, user) => {
-    if (err) { return done(err); }
-    user.tokens.push({ kind: 'pinterest', accessToken });
-    user.save((err) => {
-      done(err, user);
-    });
-  });
-}));
 
 
 

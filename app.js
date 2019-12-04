@@ -186,7 +186,7 @@ app.get('/api/google/drive', passportConfig.isAuthenticated, passportConfig.isAu
 app.get('/api/chart', apiController.getChart);
 app.get('/api/google/sheets', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getGoogleSheets);
 // app.get('/api/quickbooks', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getQuickbooks);
-app.get('/api/quickbooks', passportConfig.isAuthenticated, passportConfig.isAuthorized, quickbooksController.getCustomerList);
+app.get('/api/quickbooks', passportConfig.isAuthenticated, passportConfig.isAuthorized, quickbooksController.getOutstandingAccountPayable);
 app.get('/api/quickbooks/get-accounts', passportConfig.isAuthenticated, passportConfig.isAuthorized, quickbooksController.getAccounts);
 
 /**

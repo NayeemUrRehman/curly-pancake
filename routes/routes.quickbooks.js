@@ -6,6 +6,7 @@ router.get('/', quickbooksController.getCustomerList)
 
 // About page route.
 router.get('/accounts', quickbooksController.getAccounts);
+router.get('/cashrunaway',quickbooksController.getCashRunaway);
 
 
 module.exports = router;
