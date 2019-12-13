@@ -85,7 +85,6 @@ const quickbooksStrategyConfig = new OAuth2Strategy({
       user.tokens.some((tokenObject) => {
         if (tokenObject.kind === 'quickbooks') {
           tokenObject.accessToken = accessToken;
-          console.log('tojen');
           
           tokenObject.accessTokenExpires = moment().add(params.expires_in, 'seconds').format();
           tokenObject.refreshToken = refreshToken;
@@ -313,8 +312,10 @@ refresh.use('google', googleStrategyConfig);
 exports.isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
         
+        
     return next();
   }
+  console.log('na');
   res.redirect('/login');
 };
 

@@ -1,0 +1,22 @@
+extends ../layout
+
+block content
+  h1 Invoices
+  data.overdue
+
+  p.lead you have got #{data.overdue} invoices overdue, totalling $#{data.totalValueoverDue} and this is impacting your cash.
+  hr
+  h1 Average
+  p.lead Your average invoiced revenue per customer over the last 10 days is $5000  which is $1345 up on last month.
+  hr
+  h1 Account Receivable
+  p.lead You will have $#{data.accountReceivable} in free cash if all customers  & suppliers were cleared. 
+  hr
+  h1 Customers pay you in
+  p.lead #{data.customerAveragePayDays} days.
+  hr
+  h1 You pay suppliers in
+  p.lead #{data.YourAveragePayDays} days.
+  hr
+  h1 prefrences
+  p.lead #{data.pref}
