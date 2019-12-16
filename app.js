@@ -20,7 +20,6 @@ const sass = require('node-sass-middleware');
 const multer = require('multer');
 const Quickbooks = require('node-quickbooks');
 Quickbooks.setOauthVersion('2.0')
-
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
 /**
@@ -36,6 +35,8 @@ const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const quickbooksController = require('./controllers/controller.quickbooks');
+const {dashboardData} = require('./controllers/dashboard')
+
 
 /**
  * Routes
@@ -152,31 +153,7 @@ app.post('/account/profile', passportConfig.isAuthenticated, userController.post
 app.post('/account/password', passportConfig.isAuthenticated, userController.postUpdatePassword);
 app.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);
 app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userController.getOauthUnlink);
-app.get('/accounting',passportConfig.isAuthenticated, async function(req, res){
-  console.log('something here',req.user.tokens);
-  const token = req.user.tokens.find((token) => token.kind === 'quickbooks');
-  const qbo = new Quickbooks(process.env.QUICKBOOKS_CLIENT_ID, process.env.QUICKBOOKS_CLIENT_SECRET,
-    token.accessToken, false, req.user.quickbooks, true, false, null, '2.0', token.refreshToken);
-    let data = {};
-  qbo.findInvoices([{field: 'Balance', value: '0', operator:'>'}], function(err, invoices){
-    console.log('data',invoices.QueryResponse.totalCount);
-    // res.send({data:invoices.QueryResponse.Invoice})
-    // return
-    data.accountReceivable = invoices.QueryResponse.Invoice
-    res.send(data)
-    return
-    data.overdue = data.QueryResponse.totalCount;
-  });
-  return
-  data.totalValueoverDue = 5000;
-  data.accountReceivable = 3000;
-  data.customerAveragePayDays = 20;
-  data.YourAveragePayDays = 10;
-  res.render('accounting/dashboard', {
-    title: 'Accounts',
-    data
-  })
-})
+app.get('/accounting',passportConfig.isAuthenticated, dashboardData)
 
 /**
  * API examples routes.
