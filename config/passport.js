@@ -70,22 +70,14 @@ const quickbooksStrategyConfig = new OAuth2Strategy({
   passReqToCallback: true
 },
 (res, accessToken, refreshToken, params, profile, done) => {
-  // console.log('Something went wrong.',res);    
-  // console.log('accessToken', accessToken);
-  // console.log('refreshToken', refreshToken);
-  // console.log('params', params);
-  console.log('profile', profile); 
   // User.findOne({realmId}, (err, user) => {
     User.findById(res.user._id, (err, user) => {
-    console.log('some Error', err);
-    
     if (err) { return done(err); }
     user.quickbooks = res.query.realmId;
     if (user.tokens.filter((vendor) => (vendor.kind === 'quickbooks'))[0]) {
       user.tokens.some((tokenObject) => {
         if (tokenObject.kind === 'quickbooks') {
           tokenObject.accessToken = accessToken;
-          
           tokenObject.accessTokenExpires = moment().add(params.expires_in, 'seconds').format();
           tokenObject.refreshToken = refreshToken;
           tokenObject.refreshTokenExpires = moment().add(params.x_refresh_token_expires_in, 'seconds').format();

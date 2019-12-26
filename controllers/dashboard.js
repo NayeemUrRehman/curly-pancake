@@ -12,10 +12,10 @@ exports.dashboardData = function(req, res) {
     let data = {};
     qbo.findInvoices([
       {field:"DueDate",value: moment().format("YYYY-MM-DD"),operator:'<'},
-      {field: 'Balance', value: '0', operator:'>'}], function(err, invoices){
-        console.log('Status1',invoices.QueryResponse.Invoice.map(el=>el.Balance).reduce((ac, cur) => ac + cur));
+      {field: 'Balance', value: '0', operator:'>'}], function(err, invoices) {
+        // console.log('Status1',invoices.QueryResponse.Invoice.map(el=>el.Balance).reduce((ac, cur) => ac + cur));
         data.totalValueoverDue = Math.floor(invoices.QueryResponse.Invoice.map(el=>el.Balance).reduce((ac, cur) => ac + cur))
-        qbo.findInvoices([{field: 'Balance', value: '0', operator:'>'}], function(err, invoices){
+        qbo.findInvoices([{field: 'Balance', value: '0', operator:'>'}], function(err, invoices) {
           data.accountReceivable  = invoices.QueryResponse.Invoice.map(el=>el.Balance).reduce((ac, cur) => ac + cur);
           data.customerAveragePayDays = 20;
           data.YourAveragePayDays = 10;

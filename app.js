@@ -35,7 +35,7 @@ const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const quickbooksController = require('./controllers/controller.quickbooks');
-const {dashboardData} = require('./controllers/dashboard')
+const { dashboardData } = require('./controllers/dashboard')
 
 
 /**
@@ -196,7 +196,6 @@ app.get('/auth/quickbooks', passport.authorize('quickbooks', { scope: ['com.intu
 app.get('/auth/quickbooks/callback', passport.authorize('quickbooks', { failureRedirect: '/login' }), (req, res) => {
   console.log('sure?');
   res.redirect('/api/quickbooks');
-  // res.redirect(req.session.returnTo);
 });
 
 /**
