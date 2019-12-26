@@ -1,8 +1,101 @@
 const Quickbooks = require('node-quickbooks');
 const validator = require('validator');
+const moment =  require('moment')
+var date = moment(new Date);
+
 
 Quickbooks.setOauthVersion('2.0');
-// Display list of all Genre.
+
+exports.getOutstandingAccountPayable = function(req, res) {
+  const token = req.user.tokens.find((token) => token.kind === 'quickbooks');
+  const qbo = new Quickbooks(process.env.QUICKBOOKS_CLIENT_ID, process.env.QUICKBOOKS_CLIENT_SECRET,
+    token.accessToken, false, req.user.quickbooks, true, false, null, '2.0', token.refreshToken);
+
+    qbo.reportBalanceSheet({date_macro:'This Fiscal Year'}, function(err, balanceSheetReport) {
+    
+      /** 
+      * date-macro Supported Values: Today, 
+      * Yesterday, This Week, Last Week, This Week-to-date,
+      * Last Week-to-date, Next Week, Next 4 Weeks, This Month,
+      * Last Month, This Month-to-date, Last Month-to-date, Next Month,
+      * This Fiscal Quarter, Last Fiscal Quarter, This Fiscal Quarter-to-date,
+      * Last Fiscal Quarter-to-date, Next Fiscal Quarter, This Fiscal Year, Last Fiscal Year,
+      * This Fiscal Year-to-date, Last Fiscal Year-to-date, Next Fiscal Year
+      */
+     
+      const balance = Number(balanceSheetReport.Rows.Row[1].Rows.Row[0].Rows.Row[0].Summary.ColData[0].value);
+
+      let OutStandingAR = balanceSheetReport.Rows.Row[0].Rows.Row[0].Rows.Row[1].Summary.ColData[1].value;
+
+      res.send({balance});
+  
+    });
+}
+
+exports.getOutstandingAccountReceivable = function(req, res) {
+  const token = req.user.tokens.find((token) => token.kind === 'quickbooks');
+  const qbo = new Quickbooks(process.env.QUICKBOOKS_CLIENT_ID, process.env.QUICKBOOKS_CLIENT_SECRET,
+    token.accessToken, false, req.user.quickbooks, true, false, null, '2.0', token.refreshToken);
+
+    qbo.reportBalanceSheet({date_macro:'This Fiscal Year'}, function(err, balanceSheetReport) {
+    
+      /** 
+      * date-macro Supported Values: Today, 
+      * Yesterday, This Week, Last Week, This Week-to-date,
+      * Last Week-to-date, Next Week, Next 4 Weeks, This Month,
+      * Last Month, This Month-to-date, Last Month-to-date, Next Month, 
+      * This Fiscal Quarter, Last Fiscal Quarter, This Fiscal Quarter-to-date,
+      * Last Fiscal Quarter-to-date, Next Fiscal Quarter, This Fiscal Year, Last Fiscal Year, 
+      * This Fiscal Year-to-date, Last Fiscal Year-to-date, Next Fiscal Year
+      */
+
+      let OutStandingAR = balanceSheetReport.Rows.Row[0].Rows.Row[0].Rows.Row[1].Summary.ColData[1].value
+
+      res.send({ OutStandingAR });
+  
+    });
+    
+}
+
+// get cash runaway.
+exports.getCashRunaway = function(req, res){
+  const token = req.user.tokens.find((token) => token.kind === 'quickbooks');
+  const qbo = new Quickbooks(process.env.QUICKBOOKS_CLIENT_ID, process.env.QUICKBOOKS_CLIENT_SECRET,
+    token.accessToken, false, req.user.quickbooks, true, false, null, '2.0', token.refreshToken);
+  const months = date.month(); 
+  qbo.reportProfitAndLoss({date_macro:'This Fiscal Year'}, function(err, profitAndLossReport) {
+
+    qbo.reportBalanceSheet({date_macro:'This Fiscal Year'}, function(err, balanceSheetReport) {
+    
+      /** 
+      * date-macro Supported Values: Today, 
+      * Yesterday, This Week, Last Week, This Week-to-date,
+      * Last Week-to-date, Next Week, Next 4 Weeks, This Month,
+      * Last Month, This Month-to-date, Last Month-to-date, Next Month, 
+      * This Fiscal Quarter, Last Fiscal Quarter, This Fiscal Quarter-to-date,
+      * Last Fiscal Quarter-to-date, Next Fiscal Quarter, This Fiscal Year, Last Fiscal Year, 
+      * This Fiscal Year-to-date, Last Fiscal Year-to-date, Next Fiscal Year
+      */
+     
+      const expenses = Number(profitAndLossReport.Rows.Row[3].Summary.ColData[1].value) +
+                        Number(profitAndLossReport.Rows.Row[5].Summary.ColData[1].value);
+      res.send(profitAndLossReport)
+      return
+                        
+      const cashBurnRate = expenses/months;
+      console.log({cashBurnRate});
+      
+      const balance = Number(balanceSheetReport.Rows.Row[0].Summary.ColData[1].value);
+
+      const cashRunaway = balance/cashBurnRate
+
+      res.send({cashRunaway:cashRunaway.toFixed(2), cashBurnRate});
+  
+    }) 
+  });
+
+}
+
 exports.getCustomerList = function(req, res) {
     const token = req.user.tokens.find((token) => token.kind === 'quickbooks');
 
@@ -14,124 +107,13 @@ exports.getCustomerList = function(req, res) {
     //   res.send(accounts)
     // });
     var result = [];
-    // qbo.findCustomers((_, customers) => {
-    //   res.render('api/quickbooks', {
-    //     title: 'Quickbooks API',
-    //     customers: customers.QueryResponse.Customer
-    //   });
-    // });
-    // qbo.reportBalanceSheet((_,callback)=>{
-    //   console.log('Result',callback);
-    //   res.status(200).send(callback);
-    //   // result.push({result:callback})
-      
-    // })
+    
     qbo.reportProfitAndLoss((_,callback)=>{
       console.log('Result',callback);
       result.push({result:callback})
       res.status(200).send(callback);
       
     })
-    // qbo.reportProfitAndLossDetail((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportTrialBalance((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportCashFlow((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportInventoryValuationSummary((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportCustomerSales((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportItemSales((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportCustomerIncome((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportCustomerBalance((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportCustomerBalanceDetail((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportAgedReceivables((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportAgedReceivableDetail((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportVendorBalance((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportVendorBalanceDetail((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportAgedPayables((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportAgedPayableDetail((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportVendorExpenses((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportTransactionList((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportGeneralLedgerDetail((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportDepartmentSales((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-      
-    // })
-    // qbo.reportClassSales((_,callback)=>{
-    //   console.log('Result',callback);
-    //   result.push({result:callback})
-    // })
-    // res.send('api/quickbooks', result);
 };
 
 exports.getAccounts = function(req, res){
@@ -147,5 +129,32 @@ exports.getAccounts = function(req, res){
 
 // Display detail page for a specific Genre.
 exports.getCustomerDetails = function(req, res) {
-    res.send('NOT IMPLEMENTED: Genre detail: ' + req.params.id);
+  const token = req.user.tokens.find((token) => token.kind === 'quickbooks');
+
+  const qbo = new Quickbooks(process.env.QUICKBOOKS_CLIENT_ID, process.env.QUICKBOOKS_CLIENT_SECRET,
+      token.accessToken, false, req.user.quickbooks, true, false, null, '2.0', token.refreshToken);
+  qbo.findCustomers([
+    {field: 'fetchAll', value: true},
+    {field: 'FamilyName', value: 'S%', operator: 'LIKE'}
+  ], function(e, customers) {
+    console.log(customers)
+    res.send(customers);
+  })
+  
+};
+
+exports.getQuickbooks = (req, res) => {
+  const token = req.user.tokens.find((token) => token.kind === 'quickbooks');
+
+  const qbo = new Quickbooks(process.env.QUICKBOOKS_CLIENT_ID, process.env.QUICKBOOKS_CLIENT_SECRET,
+    token.accessToken, false, req.user.quickbooks, true, false, null, '2.0', token.refreshToken);
+
+  qbo.findCustomers((_, customers) => {
+    // res.send(customers);
+    // return
+    res.render('api/quickbooks', {
+      title: 'Quickbooks API',
+      customers: customers.QueryResponse.Customer
+    });
+  });
 };

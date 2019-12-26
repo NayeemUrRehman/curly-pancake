@@ -1,12 +1,8 @@
-![](https://lh4.googleusercontent.com/-PVw-ZUM9vV8/UuWeH51os0I/AAAAAAAAD6M/0Ikg7viJftQ/w1286-h566-no/hackathon-starter-logo.jpg)
 Invoice Management Starter
 =======================
 
-[![Dependency Status](https://david-dm.org/sahat/hackathon-starter/status.svg?style=flat)](https://david-dm.org/sahat/hackathon-starter) [![devDependencies Status](https://david-dm.org/sahat/hackathon-starter/dev-status.svg)](https://david-dm.org/sahat/hackathon-starter?type=dev) [![Build Status](https://travis-ci.org/sahat/hackathon-starter.svg?branch=master)](https://travis-ci.org/sahat/hackathon-starter)
 
-**Live Demo**: https://hackathon-starter.walcony.com
-
-Jump to [What's new?](https://github.com/sahat/hackathon-starter/blob/master/CHANGELOG.md)
+Jump to [What's new?](https://https://github.com/NayeemUrRehman/curly-pancake)
 
 **Node.js** web applications.
 > **“Small world with This project.”**<br>
@@ -37,8 +33,6 @@ Table of Contents
 - [Deployment](#deployment)
 - [Docker](#docker)
 - [Production](#production)
-- [Changelog](#changelog)
-- [Contributing](#contributing)
 - [License](#license)
 
 Features
@@ -147,27 +141,6 @@ e.g. `http://my-awesome-app.herokuapp.com` and
 `http://my-awesome-app.herokuapp.com/auth/google/callback` respectively.
 The same goes for other providers.
 
-<hr>
-
-<img src="https://seeklogo.com/images/S/snapchat-logo-F20CDB1199-seeklogo.com.png" height="90">
-
-- Visit <a href="https://kit.snapchat.com/portal" target="_blank">Snap Kit Developer Portal</a>
-- Click on the **+** button to create an app
-- Enter a name for your app
-- Enable the scopes that you will want to use in your app
-- Click on the **Continue** button
-- Find the **Kits** section and make sure that **Login Kit** is enabled
-- Find the **Redirect URLs** section, click the **+ Add** button, and enter `http://localhost:8080/auth/snapchat/callback`
-- Find the **Development Environment** section. Click the **Generate** button next to the *Confidential OAuth2 Client* heading within it.
-- Copy and paste the generated *Private Key* and *OAuth2 Client ID* keys into `.env`
-- **Note:** *OAuth2 Client ID* is **SNAPCHAT_ID**, *Private Key* is **SNAPCHAT_SECRET** in `.env`
-- To prepare the app for submission, fill out the rest of the required fields: *Category*, *Description*, *Privacy Policy Url*, and *App Icon*
-
-**Note:** For production use, don't forget to:
-
-- generate a *Confidential OAuth2 Client* in the **Production Environment** and use the production *Private Key* and *OAuth2 Client ID*
-- add the production URL to **Redirect URLs** section, e.g. `http://my-awesome-app.herokuapp.com/auth/snapchat/callback`
-- submit the app for review and wait for approval
 
 <hr>
 
@@ -235,91 +208,6 @@ The same goes for other providers.
  - *Secret Key* is your **clientSecret**
 
 <hr>
-
-<img src="https://stripe.com/img/about/logos/logos/black@2x.png" width="200">
-
-- <a href="https://stripe.com/" target="_blank">Sign up</a> or log into your <a href="https://manage.stripe.com" target="_blank">dashboard</a>
-- Click on your profile and click on Account Settings
-- Then click on **API Keys**
-- Copy the **Secret Key**. and add this into `.env` file
-
-<hr>
-
-<img src="https://pixabay.com/static/uploads/photo/2015/05/26/09/37/paypal-784404_960_720.png" width="200">
-
-- Visit <a href="https://developer.paypal.com" target="_blank">PayPal Developer</a>
-- Log in to your PayPal account
-- Click **Applications > Create App** in the navigation bar
-- Enter *Application Name*, then click **Create app**
-- Copy and paste *Client ID* and *Secret* keys into `.env` file
-- *App ID* is **client_id**, *App Secret* is **client_secret**
-- Change **host** to api.paypal.com if you want to test against production and use the live credentials
-
-<hr>
-
-<img src="http://33.media.tumblr.com/ffaf0075be879b3ab0b87f0b8bcc6814/tumblr_inline_n965bkOymr1qzxhga.png" width="200">
-
-- Go to <a href="https://developer.foursquare.com" target="_blank">Foursquare for Developers</a>
-- Click on **My Apps** in the top menu
-- Click the **Create A New App** button
-- Enter *App Name*, *Welcome page url*,
-- For **Redirect URI**: http://localhost:8080/auth/foursquare/callback
-- Click **Save Changes**
-- Copy and paste *Client ID* and *Client Secret* keys into `.env` file
-
-<hr>
-
-<img src="http://img4.wikia.nocookie.net/__cb20130520163346/logopedia/images/8/8d/Tumblr_logo_by_x_1337_x-d5ikwpp.png" width="200">
-
-- Go to <a href="http://www.tumblr.com/oauth/apps" target="_blank">http://www.tumblr.com/oauth/apps</a>
-- Once signed in, click **+Register application**
-- Fill in all the details
-- For **Default Callback URL**: `http://localhost:8080/auth/tumblr/callback`
-- Click **✔Register**
-- Copy and paste *OAuth consumer key* and *OAuth consumer secret* keys into `.env` file
-
-<hr>
-
-<img src="https://upload.wikimedia.org/wikipedia/commons/a/ae/Steam_logo.svg" width="200">
-
-- Go to <a href="http://steamcommunity.com/dev/apikey" target="_blank">http://steamcommunity.com/dev/apikey</a>
-- Sign in with your existing Steam account
-- Enter your *Domain Name*, then and click **Register**
-- Copy and paste *Key* into `.env` file
-
-<hr>
-
-<img src="https://sendgrid.com/brand/sg-logo-300.png" width="200">
-
-- Go to <a href="https://sendgrid.com/user/signup" target="_blank">https://sendgrid.com/user/signup</a>
-- Sign up and **confirm** your account via the *activation email*
-- Then enter your SendGrid *Username* and *Password* into `.env` file
-
-<hr>
-
-<img src="https://raw.github.com/mailgun/media/master/Mailgun_Primary.png" width="200">
-
-- Go to <a href="http://www.mailgun.com" target="_blank">http://www.mailgun.com</a>
-- Sign up and add your *Domain Name*
-- From the domain overview, copy and paste the default SMTP *Login* and *Password* into `.env` file
-
-<hr>
-
-<img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/HERE_logo.svg" width="90">
-
-- Go to <a href="https://developer.here.com" target="_blank">https://developer.here.com</a>
-- Sign up and create a Freemium project
-- Create JAVASCRIPT/REST credentials. Copy and paste the APP_ID and APP into `.env` file.
-- Note that these credentials are available on the client side, and you need to create a domain whitelist for your app credentials when you are publicly launching the app.
-
-<hr>
-
-<img src="https://s3.amazonaws.com/ahoy-assets.twilio.com/global/images/wordmark.svg" width="200">
-
-- Go to <a href="https://www.twilio.com/try-twilio" target="_blank">https://www.twilio.com/try-twilio</a>
-- Sign up for an account.
-- Once logged into the dashboard, expand the link 'show api credentials'
-- Copy your Account Sid and Auth Token
 
 <hr>
 
